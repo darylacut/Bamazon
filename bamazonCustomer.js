@@ -73,11 +73,16 @@ connection.connect(function(err) {
     .then(function(answer) {
       // creating variable for user's item choice to carry over to decrease stock function;
       var itemChoice = answer.item_id;
+      
       connection.query("SELECT * FROM products WHERE ?", {item_id: answer.item_id}, 
       function(err, result) {
         // creating variable for updated stock, to carry over to decrease stock function;
         var updatedStock = result[0].stock_quantity - answer.stock_quantity;
-        if (err) throw err;
+        if (updatedStock < 0) {
+          console.log("\n\nSorry, we are out of stock!\n\n");
+          //connection.end();
+          process.abort();
+        } else if (err) throw err;
         console.log("\n\nYou selected:\n\n   Item # " + result[0].item_id +
                     "\n   " + result[0].product_name +
                     "\n   Price: $" + result[0].price + 
@@ -89,7 +94,7 @@ connection.connect(function(err) {
   }
 
  
-  // ------------  a function to update stock quantity;
+  // ------------  a function to update the stock quantity;
 
   function decreaseStock(itemChoice, updatedStock) {
     connection.query("UPDATE products SET ? WHERE ?",
@@ -102,5 +107,28 @@ connection.connect(function(err) {
       }
     ]
     );
-    console.log(itemChoice);
+    console.log("\nThank you very much for shopping with us!\n\n");
+    continueShopping();
+  }
+
+
+  // ------------  function to ask the users if they want to continue
+
+  function continueShopping() {
+    inquirer
+    .prompt ({
+      name: 'continue',
+      type: 'list',
+      message: "Would you like to continue shopping?",
+      choices: ["   Yes/Continue", "   No/Exit"]
+
+    }).then(function(answer) {
+      switch (answer.continue) {
+        case "   Yes/Continue": listAllProducts();
+        break;
+        
+        case "   No/Exit": connection.end();
+        break;
+      }
+    })
   }
