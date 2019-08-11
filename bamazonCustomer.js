@@ -23,18 +23,18 @@ connection.connect(function(err) {
   
   
   function listAllProducts() {
-    connection.query("SELECT * FROM products", function(err, res) {
+    connection.query("SELECT * FROM products", function(err, result) {
       if (err) throw err;
 
       console.log ("\n\nHere are our products for sale:\n");
 
-      for (var i = 0; i < res.length; i++) {
+      for (var i = 0; i < result.length; i++) {
 
-        console.log("Product ID: "+ res[i].item_id + " | " + 
-                    res[i].product_name + " | " + 
-                    res[i].department_name + " | " + 
-                    "Price:  $ " + res[i].price + " | " + 
-                    "Stock Available: " + res[i].stock_quantity);
+        console.log("Product ID: "+ result[i].item_id + " | " + 
+                    result[i].product_name + " | " + 
+                    result[i].department_name + " | " + 
+                    "Price:  $ " + result[i].price + " | " + 
+                    "Stock Available: " + result[i].stock_quantity);
 
       }
       console.log("-------------------------------------------------------");
@@ -46,17 +46,39 @@ connection.connect(function(err) {
   // -----------------    creates function to prompt users;
   function productQuery() {
     inquirer
-    .prompt({
-      name: 'action',
+    .prompt([
+      {
+      name: 'item_id',
       type: 'input',
       message: "\nPlease enter ID of item which you would you like to buy\n\n",
       validate: function(value) {
         if (isNaN(value) === false) {
           return true;
-        }
+        } 
         return false;
       }
-    })
-  
-  //   .then(function(answer)
+    },
+    {
+      name: 'stock_quantity',
+      type: 'input',
+      message: "\nHow many would you like to buy?\n\n",
+      validate: function(value) {
+        if (isNaN(value) === false) {
+          return true;
+        } 
+        return false;
+      }
+    }
+  ])
+    .then(function(answer) {
+      connection.query("SELECT item_id, stock_quantity FROM products", 
+        [answer.item_id, answer.stock_quantity], 
+      function(err, result) {
+        if (err) throw err;
+        console.log(answer.item_id, answer.stock_quantity);
+        // console.log("\nYou selected: \n\nItem # " + result[0].item_id +
+        //             "\n" + result[0].product_name +
+        //             "\n$ " + result[0].price);
+        });
+    });
   }
