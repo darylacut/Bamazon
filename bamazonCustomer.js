@@ -1,5 +1,5 @@
 // -----------------------  modules and connection setup;
-//var columnify = require('columnify')
+//var columnify = require('columnify');
 var mysql = require("mysql");
 var inquirer = require('inquirer');
 
@@ -29,14 +29,16 @@ connection.connect(function(err) {
 
       for (var i = 0; i < result.length; i++) {
 
+       
         console.log("Product ID: "+ result[i].item_id + "   |   " + 
                     result[i].product_name + "    |   " + 
                     result[i].department_name + "   |   " + 
                     "Price: $" + result[i].price + "    |   " + 
                     "Stock Available: " + result[i].stock_quantity);
-
+        
       }
       console.log("-------------------------------------------------------");
+     
       productQuery();
     });
   }
