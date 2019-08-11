@@ -15,7 +15,6 @@ var connection = mysql.createConnection({
 // -----------------    creates connection function;
 connection.connect(function(err) {
     if (err) throw err;
-    //console.log("\nconnected as id " + connection.threadId);
     listAllProducts();
   });
 
@@ -30,10 +29,10 @@ connection.connect(function(err) {
 
       for (var i = 0; i < result.length; i++) {
 
-        console.log("Product ID: "+ result[i].item_id + " | " + 
-                    result[i].product_name + " | " + 
-                    result[i].department_name + " | " + 
-                    "Price:  $" + result[i].price + " | " + 
+        console.log("Product ID: "+ result[i].item_id + "   |   " + 
+                    result[i].product_name + "    |   " + 
+                    result[i].department_name + "   |   " + 
+                    "Price: $" + result[i].price + "    |   " + 
                     "Stock Available: " + result[i].stock_quantity);
 
       }
@@ -44,6 +43,7 @@ connection.connect(function(err) {
 
 
   // -----------------    creates function to prompt users;
+
   function productQuery() {
     inquirer
     .prompt([
@@ -71,14 +71,36 @@ connection.connect(function(err) {
     }
   ])
     .then(function(answer) {
+      // creating variable for user's item choice to carry over to decrease stock function;
+      var itemChoice = answer.item_id;
       connection.query("SELECT * FROM products WHERE ?", {item_id: answer.item_id}, 
       function(err, result) {
+        // creating variable for updated stock, to carry over to decrease stock function;
+        var updatedStock = result[0].stock_quantity - answer.stock_quantity;
         if (err) throw err;
         console.log("\n\nYou selected:\n\n   Item # " + result[0].item_id +
                     "\n   " + result[0].product_name +
                     "\n   Price: $" + result[0].price + 
                     "\n   Quantity: " + answer.stock_quantity + "pcs" + 
-                    "\n\n   Total Cost is: $" + result[0].price*answer.stock_quantity);
+                    "\n\n   Total Cost is: $" + result[0].price * answer.stock_quantity);
+        decreaseStock(itemChoice, updatedStock);
         });
     });
+  }
+
+ 
+  // ------------  a function to update stock quantity;
+
+  function decreaseStock(itemChoice, updatedStock) {
+    connection.query("UPDATE products SET ? WHERE ?",
+    [
+      {
+        stock_quantity: updatedStock
+      },
+      {
+        item_id: itemChoice
+      }
+    ]
+    );
+    console.log(itemChoice);
   }
